@@ -89,7 +89,7 @@ function CommitAndPush() {
     fi
     wget --quiet -O Group/OLD https://raw.githubusercontent.com/d3fc0n6/TacobotList/master/32ids
     NEW=$(wc -l <"OUT/32ids")
-    OLD=$(wc -l <"Group/friendold")
+    OLD=$(wc -l <"Group/OLD")
     DIF=$((NEW - OLD))
     echo $OLD/$NEW
     echo $DIF
