@@ -13,7 +13,7 @@ function getSteamIDs() {
         for i in $(seq $(wc -l <groups)); do
             LINE=$(head -n "$i" groups | tail -n +"$i")
             echo $GR"Grabbing $LINE"$RE
-            curl --connect-timeout 5 https://steamcommunity.com/groups/"$LINE"/memberslistxml/?xml=1 | grep 'steamID64' | tr -d '</>,' | sed 's/steamID64//g' >>64ids.tmp
+            curl -s --connect-timeout 5 https://steamcommunity.com/groups/"$LINE"/memberslistxml/?xml=1 | grep 'steamID64' | tr -d '</>,' | sed 's/steamID64//g' >>64ids.tmp
         done
         tr -d '\r' <64ids.tmp >64ids.tmp2
         sort -u -n 64ids.tmp2 >Group/64ids # that was easy
@@ -68,34 +68,33 @@ function Convert(){
     # Sort found SteamIDs32/64 and check for duplicates
     # We have to do this since we copied over the ids with >> (which makes them repeat)
     # shitpost code
-    cat Group/32ids >>OUT/32ids.tmp
-    cat Group/64ids >>OUT/64ids.tmp
-    cat OUT/32ids.tmp | sort -un >OUT/32ids.tmp2
-    cat OUT/64ids.tmp | sort -un >OUT/64ids.tmp2
-    mv OUT/32ids.tmp2 OUT/32ids
-    mv OUT/64ids.tmp2 OUT/64ids
-    mv OUT/32ids ../TacobotList/32ids
-    mv OUT/64ids ../TacobotList/64ids
+    cat Group/32ids >>../TacobotList/32ids
+    cat Group/64ids >>../TacobotList/64ids
+    cat ../TacobotList/32ids | sort -un >../TacobotList/32ids.tmp
+    cat ../TacobotList/64ids | sort -un >../TacobotList/64ids.tmp
+    mv ../TacobotList/32ids.tmp ../TacobotList/32ids
+    mv ../TacobotList/64ids.tmp ../TacobotList/64ids
     # Alright we're done here
-    rm OUT/*.tmp*
+    rm Group/*
     # Convert 32ids for TF2BD
     php convert.php >../TacobotList/playerlist.tacobot.json
 }
 
 
 function CommitAndPush() {
-    if [ -f Group/OLD ]; then
-        rm Group/OLD
-    fi
     wget --quiet -O Group/OLD https://raw.githubusercontent.com/d3fc0n6/TacobotList/master/32ids
-    NEW=$(wc -l <"OUT/32ids")
+    NEW=$(wc -l <"../TacobotList/32ids")
     OLD=$(wc -l <"Group/OLD")
     DIF=$((NEW - OLD))
     echo $OLD/$NEW
     echo $DIF
     cd ../TacobotList
     git add 32ids 64ids playerlist.tacobot.json
-    git commit --quiet -m "Added $DIF entries. There are now $NEW entries"
+    if [ $NEW == 1 ]; then
+        git commit --quiet -m "Added $DIF entry. There are now $NEW entries"
+    else
+        git commit --quiet -m "Added $DIF entries. There are now $NEW entries"
+    fi
     git push
 }
 
@@ -104,10 +103,6 @@ function CommitAndPush() {
 if [ ! -d Group/ ]; then
     echo $RD"Missing Group folder!, Creating.."$RE
     mkdir Group/
-fi
-if [ ! -d OUT/ ]; then
-    echo $RD"Missing OUT folder!, Creating.."$RE
-    mkdir OUT/
 fi
 
 getSteamIDs
