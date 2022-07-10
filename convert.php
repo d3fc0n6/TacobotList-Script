@@ -31,7 +31,7 @@ $bdArray = [
         "authors" => [ "WalterWhite3", "d3fc0n6" ],
         "description" => "List of Tacobot members found by d3fc0n6.",
         "title" => "Tacobot Members",
-        "update_url" => "https://raw.githubusercontent.com/d3fc0n6/CheaterList/master/playerlist.tacobot.json"
+        "update_url" => "https://raw.githubusercontent.com/d3fc0n6/TacobotList/master/playerlist.tacobot.json"
     ],
     "players" => $playerArray
 ];
